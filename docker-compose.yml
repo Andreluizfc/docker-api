@@ -1,0 +1,30 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: fastapi_db
+      DB_HOST: db  # Use the service name as the host - Bug de conexão solucionado
+
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: fastapi_db
+    ports:
+      - "5432:5432"  # Optional, for external access
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    command: ["postgres", "-c", "listen_addresses=0.0.0.0"]  # Ensure it listens on all addresses
+
+volumes:
+  db_data:
+
