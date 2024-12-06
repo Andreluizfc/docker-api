@@ -3,7 +3,7 @@ from databases import Database
 from pydantic import BaseModel
 import os
 import uvicorn
-
+import json
 
 DB_USER = os.getenv("POSTGRES_USER", "user")
 DB_PASSWORD = os.getenv("POSTGRES_PASSWORD", "password")
@@ -54,7 +54,9 @@ async def add_data(person: Person):
     VALUES (:name, :sex, :age, :cryptos);
     """
     try:
-        await database.execute(query, person.dict())
+        # Ensure cryptos is a JSON string if it's a dict
+        cryptos_json = json.dumps(person.cryptos) if isinstance(person.cryptos, dict) else person.cryptos
+        await database.execute(query, {"name": person.name, "sex": person.sex, "age": person.age, "cryptos": cryptos_json})
         return {"message": f"Data for {person.name} has been added!"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
